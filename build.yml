@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing security tools..."
+      - pip install bandit
+  build:
+    commands:
+      - echo "Running SAST scan on Python code..."
+      # -r scans recursively, -ll reports Medium and High severity issues
+      - bandit -r app.py -ll
