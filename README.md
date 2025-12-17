@@ -1,14 +1,3 @@
-Here is the complete, ready-to-use `README.md` for your GitHub repository.
-
-**Action Item:**
-
-1. Create a folder named `docs/` in your repository.
-2. Rename your screenshots to simpler names (e.g., `trivy-failure.jpg`, `bandit-scan.jpg`, `502-error.jpg`) and move them into that folder.
-3. Copy the code block below into your `README.md`.
-
----
-
-```markdown
 # 🛡️☁️ AWS DevSecOps Pipeline: End-to-End Cloud Security
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
@@ -185,3 +174,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ```
 
 ```
+
