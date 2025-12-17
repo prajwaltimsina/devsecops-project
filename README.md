@@ -68,7 +68,6 @@ The infrastructure is designed with strict network isolation, utilizing public s
 
 Integrated into GitHub Actions to scan Python source code for insecure logic (e.g., hardcoded bindings, shell injection risks) before the build stage.
 
-> **Evidence:** See `docs/bandit-scan.jpg` for B104 binding detection.
 
 ### 2. Software Composition Analysis (SCA) - *Trivy*
 
@@ -77,7 +76,6 @@ Scans Docker container base images and Python dependencies for CVEs.
 * **Policy:** Builds fail on "Critical" severity findings.
 * **Remediation:** Automated checks ensure Flask and Werkzeug are patched against known vulnerabilities (e.g., CVE-2024-34069).
 
-> **Evidence:** See `docs/trivy-failure.jpg` where the pipeline blocked a build due to High Severity CVEs.
 
 ### 3. Dynamic Analysis (DAST) - *OWASP ZAP*
 
@@ -157,8 +155,6 @@ docker push <YOUR_AWS_ACCOUNT_ID>[.dkr.ecr.us-east-1.amazonaws.com/my-secure-app
 **Root Cause:** Port mismatch. ALB sent traffic to Port 80, but container listened on Port 5000.
 **Resolution:** Reconfigured Target Group to map Port 80 -> 5000.
 
-> **Evidence:** See `docs/502-error.jpg`.
-
 ### 🔴 ECR Pull Failures
 
 **Issue:** Fargate tasks stuck in "PENDING".
@@ -174,3 +170,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ```
 
 ```
+
