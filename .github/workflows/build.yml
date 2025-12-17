@@ -1,6 +1,11 @@
 name: AWS DevSecOps Pipeline
 
-on: [push]
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:        # <--- ADD THIS SECTION
+      - 'README.md'
+      - 'docs/**'
 
 permissions:
   id-token: write   # This is REQUIRED for requesting the OIDC JWT
