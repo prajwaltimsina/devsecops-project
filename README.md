@@ -1,7 +1,22 @@
+Here is the complete, ready-to-use `README.md` for your GitHub repository.
+
+**Action Item:**
+
+1. Create a folder named `docs/` in your repository.
+2. Rename your screenshots to simpler names (e.g., `trivy-failure.jpg`, `bandit-scan.jpg`, `502-error.jpg`) and move them into that folder.
+3. Copy the code block below into your `README.md`.
+
+---
+
+```markdown
 # 🛡️☁️ AWS DevSecOps Pipeline: End-to-End Cloud Security
 
-## 📖 Executive Summary
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Python](https://img.shields.io/badge/python-3.9-blue)
+![AWS](https://img.shields.io/badge/AWS-Fargate%20%7C%20WAF-orange)
+![Security](https://img.shields.io/badge/Security-SAST%20%7C%20DAST%20%7C%20SCA-red)
 
+## 📖 Executive Summary
 This project demonstrates a secure, serverless 3-tier web application architecture on AWS. It implements a **"Shift Left"** methodology by integrating automated security gates (SAST, SCA) into the CI/CD workflow and a **"Shield Right"** strategy using active runtime protection (WAF) and intelligent threat detection (GuardDuty).
 
 **Role:** Cloud Security Engineer / DevOps Engineer
@@ -10,36 +25,33 @@ This project demonstrates a secure, serverless 3-tier web application architectu
 ---
 
 ## 🏗️ Architecture
+The infrastructure is designed with strict network isolation, utilizing public subnets for the Load Balancer and private subnets for the application logic.
 
-The infrastructure is deployed using Terraform/CloudFormation with a focus on strict network isolation.
+```text
++-----------------------------------------------------------------------------------+
+|  AWS Cloud (VPC)                                                                  |
+|                                                                                   |
+|  +---------------------------+             +---------------------------+          |
+|  |  Public Subnet            |             |  Private Subnet           |          |
+|  |                           |             |                           |          |
+|  |   [Internet Gateway]      |             |   [ECS Fargate Task]      |          |
+|  |           |               |             |   +-------------------+   |          |
+|  |           v               |             |   |  Flask App        |   |          |
+|  |   [AWS WAF] (Security)    |             |   |  (Port 5000)      |   |          |
+|  |           |               |             |   +---------^---------+   |          |
+|  |           v               |             |             |             |          |
+|  |   [Application LB] +------------------------------>   |             |          |
+|  |   (Port 80 -> 5000)       |             |             |             |          |
+|  +---------------------------+             +---------------------------+          |
+|                                                                                   |
+|  +-------------------------------------------------------------+                  |
+|  |  Security Services                                          |                  |
+|  |  [GuardDuty] ---> Monitors VPC Flow Logs & CloudTrail       |                  |
+|  |  [ECR Registry] <--- Image Pull (Fargate)                   |                  |
+|  +-------------------------------------------------------------+                  |
++-----------------------------------------------------------------------------------+
 
-```mermaid
-graph TD
-    subgraph "AWS Cloud (VPC)"
-        subgraph "Public Subnet"
-            IGW[Internet Gateway]
-            ALB[Application Load Balancer]
-            WAF["AWS WAF - ACL Rules"]
-        end
-        
-        subgraph "Private Subnet"
-            Fargate[ECS Fargate Task]
-            App[Python Flask App]
-        end
-        
-        subgraph "Security Services"
-            GD["GuardDuty (Threat Detection)"]
-            ECR["ECR (Image Registry)"]
-        end
-    end
-
-    User((User)) -->|HTTPS Traffic| WAF
-    WAF -->|Filtered Traffic| ALB
-    ALB -->|Port 80 -> 5000| Fargate
-    Fargate --> App
-    Fargate -.->|Pull Image| ECR
-
----
+```
 
 ---
 
@@ -49,7 +61,8 @@ graph TD
 .
 ├── .github/
 │   └── workflows/
-│       └── build.yml      # CI/CD Pipeline (Trivy, Bandit, ZAP, Build & Push)
+│       └── build.yml      # CI/CD Pipeline (Trivy, Bandit, ZAP)
+├── docs/                  # Screenshots and diagrams
 ├── app.py                 # Vulnerable Python Flask application (The Target)
 ├── Dockerfile             # Container definition
 ├── requirements.txt       # Python dependencies (Flask, Werkzeug, etc.)
@@ -66,12 +79,16 @@ graph TD
 
 Integrated into GitHub Actions to scan Python source code for insecure logic (e.g., hardcoded bindings, shell injection risks) before the build stage.
 
+> **Evidence:** See `docs/bandit-scan.jpg` for B104 binding detection.
+
 ### 2. Software Composition Analysis (SCA) - *Trivy*
 
 Scans Docker container base images and Python dependencies for CVEs.
 
 * **Policy:** Builds fail on "Critical" severity findings.
 * **Remediation:** Automated checks ensure Flask and Werkzeug are patched against known vulnerabilities (e.g., CVE-2024-34069).
+
+> **Evidence:** See `docs/trivy-failure.jpg` where the pipeline blocked a build due to High Severity CVEs.
 
 ### 3. Dynamic Analysis (DAST) - *OWASP ZAP*
 
@@ -95,50 +112,76 @@ docker run -t owasp/zap2docker-stable zap-baseline.py -t http://<LOAD_BALANCER_D
 
 * AWS CLI configured with Administrator access
 * Docker Desktop installed
-* Terraform installed
 
-### Local Development
+### 1. Local Development
 
-1. Clone the repo:
+Clone the repo and run the container locally to verify functionality:
+
 ```bash
-git clone https://github.com/yourusername/aws-devsecops-project.git
-
-```
-
-
-2. Build the container:
-```bash
+git clone [https://github.com/yourusername/aws-devsecops-project.git](https://github.com/yourusername/aws-devsecops-project.git)
 docker build -t flask-app .
-
-```
-
-
-3. Run locally:
-```bash
 docker run -p 5000:5000 flask-app
 
 ```
 
+### 2. Deployment to AWS (Manual Push)
 
+The application is deployed to Amazon Elastic Container Registry (ECR) via the CLI.
 
-### Deployment
-
-To deploy the infrastructure to AWS:
+**Step A: Authenticate with ECR**
 
 ```bash
-cd terraform/
-terraform init
-terraform apply
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <YOUR_AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
 
 ```
+
+**Step B: Build & Tag the Image**
+
+```bash
+docker build -t my-secure-app .
+docker tag my-secure-app:latest <YOUR_AWS_ACCOUNT_ID>[.dkr.ecr.us-east-1.amazonaws.com/my-secure-app:latest](https://.dkr.ecr.us-east-1.amazonaws.com/my-secure-app:latest)
+
+```
+
+**Step C: Push to ECR**
+
+```bash
+docker push <YOUR_AWS_ACCOUNT_ID>[.dkr.ecr.us-east-1.amazonaws.com/my-secure-app:latest](https://.dkr.ecr.us-east-1.amazonaws.com/my-secure-app:latest)
+
+```
+
+*Once pushed, the ECS Fargate service is updated to pull the `latest` image tag.*
 
 ---
 
 ## ⚠️ Challenges & Resolutions (War Stories)
 
-* **The "Firewall" Blocker:** Resolved ALB timeouts by replacing the default Security Group with a custom SG allowing inbound HTTP from 0.0.0.0/0.
-* **502 Bad Gateway:** Fixed port mismatch between ALB (Port 80) and Container (Port 5000) by reconfiguring the Target Group.
-* **ECR Pull Failures:** Enabled "Auto-assign Public IP" for Fargate tasks in public subnets to allow image pulling.
+### 🔴 The "Firewall" Blocker
+
+**Issue:** Load Balancer was unreachable; application timed out.
+**Root Cause:** ALB was assigned the default Security Group blocking inbound traffic.
+**Resolution:** Attached a custom SG allowing inbound HTTP from `0.0.0.0/0`.
+
+### 🔴 502 Bad Gateway
+
+**Issue:** Users received 502 errors despite healthy targets.
+**Root Cause:** Port mismatch. ALB sent traffic to Port 80, but container listened on Port 5000.
+**Resolution:** Reconfigured Target Group to map Port 80 -> 5000.
+
+> **Evidence:** See `docs/502-error.jpg`.
+
+### 🔴 ECR Pull Failures
+
+**Issue:** Fargate tasks stuck in "PENDING".
+**Root Cause:** Tasks in public subnets lacked Public IPs to reach ECR.
+**Resolution:** Enabled "Auto-assign Public IP".
 
 ---
 
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+```
+
+```
